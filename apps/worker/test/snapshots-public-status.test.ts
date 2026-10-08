@@ -45,7 +45,7 @@ function samplePayload(now = 1_728_000_000) {
 describe('snapshots/public-status', () => {
   it('exposes stable snapshot key and max-age constants', () => {
     expect(getSnapshotKey()).toBe('status');
-    expect(getSnapshotMaxAgeSeconds()).toBe(60);
+    expect(getSnapshotMaxAgeSeconds()).toBe(300);
   });
 
   it('reads a fresh and valid snapshot payload', async () => {
@@ -77,7 +77,7 @@ describe('snapshots/public-status', () => {
         first: () => ({ generated_at: 0, body_json: JSON.stringify(samplePayload(0)) }),
       },
     ]);
-    await expect(readStatusSnapshot(staleDb, 200)).resolves.toBeNull();
+    await expect(readStatusSnapshot(staleDb, 400)).resolves.toBeNull();
 
     const invalidJsonDb = createFakeD1Database([
       {
@@ -113,11 +113,11 @@ describe('snapshots/public-status', () => {
     const young = new Response('ok');
     applyStatusCacheHeaders(young, 10);
     expect(young.headers.get('Cache-Control')).toBe(
-      'public, max-age=30, stale-while-revalidate=20, stale-if-error=20',
+      'public, max-age=30, stale-while-revalidate=260, stale-if-error=260',
     );
 
     const tooOld = new Response('ok');
-    applyStatusCacheHeaders(tooOld, 120);
+    applyStatusCacheHeaders(tooOld, 300);
     expect(tooOld.headers.get('Cache-Control')).toBe(
       'public, max-age=0, stale-while-revalidate=0, stale-if-error=0',
     );

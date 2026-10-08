@@ -394,7 +394,7 @@ adminRoutes.post('/monitors', async (c) => {
       name: input.name,
       type: input.type,
       target: input.target,
-      intervalSec: input.interval_sec ?? 60,
+      intervalSec: input.interval_sec ?? 300,
       timeoutMs: input.timeout_ms ?? 10000,
 
       httpMethod: input.type === 'http' ? (input.http_method ?? null) : null,

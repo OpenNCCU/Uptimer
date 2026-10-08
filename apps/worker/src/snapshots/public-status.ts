@@ -2,7 +2,7 @@ import { AppError } from '../middleware/errors';
 import { publicStatusResponseSchema, type PublicStatusResponse } from '../schemas/public-status';
 
 const SNAPSHOT_KEY = 'status';
-const MAX_AGE_SECONDS = 60;
+const MAX_AGE_SECONDS = 300;
 
 export function getSnapshotKey() {
   return SNAPSHOT_KEY;
@@ -76,7 +76,7 @@ export async function writeStatusSnapshot(
 }
 
 export function applyStatusCacheHeaders(res: Response, ageSeconds: number): void {
-  // Guarantee freshness bound <= 60s. Prefer <= 30s in normal cases.
+  // Snapshot stays valid for one 5-minute check. Edge cache stays short.
   //
   // We ensure (max-age + stale-*) never exceeds MAX_AGE_SECONDS.
   const remaining = Math.max(0, MAX_AGE_SECONDS - ageSeconds);

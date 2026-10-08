@@ -1,5 +1,5 @@
-const SNAPSHOT_MAX_AGE_SECONDS = 60;
-const PREFERRED_MAX_AGE_SECONDS = 30;
+const SNAPSHOT_MAX_AGE_SECONDS = 300;
+const PREFERRED_MAX_AGE_SECONDS = 60;
 
 function acceptsHtml(request) {
   const accept = request.headers.get('Accept') || '';

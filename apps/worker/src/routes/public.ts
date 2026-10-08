@@ -7,6 +7,7 @@ import type { Env } from '../env';
 import { computePublicStatusPayload } from '../public/status';
 import {
   applyStatusCacheHeaders,
+  getSnapshotMaxAgeSeconds,
   readStatusSnapshot,
   toSnapshotPayload,
   writeStatusSnapshot,
@@ -442,8 +443,9 @@ publicRoutes.get('/status', async (c) => {
     const res = c.json(snapshot.data);
     applyStatusCacheHeaders(res, snapshot.age);
 
-    // If we're close to the freshness boundary, trigger a background refresh.
-    if (snapshot.age >= 30) {
+    // Recompute only in the last minute of the 5-minute snapshot window.
+    // Refreshing at 30s made every open status page rescan check_results.
+    if (snapshot.age >= getSnapshotMaxAgeSeconds() - 60) {
       c.executionCtx.waitUntil(
         (async () => {
           const refreshedAt = Math.floor(Date.now() / 1000);

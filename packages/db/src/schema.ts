@@ -24,7 +24,7 @@ export const monitors = sqliteTable(
     type: text('type').$type<MonitorType>().notNull(),
     target: text('target').notNull(),
 
-    intervalSec: integer('interval_sec').notNull().default(60),
+    intervalSec: integer('interval_sec').notNull().default(300),
     timeoutMs: integer('timeout_ms').notNull().default(10000),
 
     httpMethod: text('http_method'),

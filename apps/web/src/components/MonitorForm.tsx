@@ -181,7 +181,7 @@ export function MonitorForm(props: CreateProps | EditProps) {
   const [sortOrder, setSortOrder] = useState(monitor?.sort_order ?? 0);
   const [type, setType] = useState<MonitorType>(monitor?.type ?? 'http');
   const [target, setTarget] = useState(monitor?.target ?? '');
-  const [intervalSec, setIntervalSec] = useState(monitor?.interval_sec ?? 60);
+  const [intervalSec, setIntervalSec] = useState(monitor?.interval_sec ?? 300);
   const [timeoutMs, setTimeoutMs] = useState(monitor?.timeout_ms ?? 10000);
 
   const [httpMethod, setHttpMethod] = useState<HttpMethod>(
