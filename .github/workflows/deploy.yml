@@ -274,13 +274,6 @@ jobs:
           print(f"Wrote {dst}")
           PY
 
-      - name: Apply D1 migrations (remote)
-        shell: bash
-        working-directory: apps/worker
-        run: |
-          set -euo pipefail
-          pnpm exec wrangler d1 migrations apply "$D1_NAME" --remote --config "$WRANGLER_CI_CONFIG"
-
       - name: Deploy Worker (idempotent)
         id: deploy_worker
         shell: bash
@@ -303,6 +296,15 @@ jobs:
             echo "WORKER_URL=$worker_url" >> "$GITHUB_ENV"
             echo "worker_url=$worker_url" >> "$GITHUB_OUTPUT"
           fi
+
+      # Run after the Worker upload so a D1 rows_read lockout cannot block the
+      # cron change. Re-run this workflow after the daily quota resets to apply SQL.
+      - name: Apply D1 migrations (remote)
+        shell: bash
+        working-directory: apps/worker
+        run: |
+          set -euo pipefail
+          pnpm exec wrangler d1 migrations apply "$D1_NAME" --remote --config "$WRANGLER_CI_CONFIG"
 
       - name: Warm public status snapshot (best-effort)
         if: ${{ steps.deploy_worker.outputs.worker_url != '' }}
