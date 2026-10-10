@@ -211,39 +211,27 @@ async function listHeartbeatsByMonitorId(
   const ids = [...new Set(monitorIds)].filter((id) => Number.isFinite(id));
   if (ids.length === 0) return byMonitor;
 
-  // Use a window function to cap each monitor partition to N rows.
-  // NOTE: check_results has an index (monitor_id, checked_at) to keep this efficient.
-  const placeholders = ids.map((_, idx) => `?${idx + 2}`).join(', ');
+  // One indexed LIMIT per monitor. A window over the whole partition makes D1
+  // count every retained check_results row on each status refresh.
   const sql = `
     SELECT monitor_id, checked_at, status, latency_ms
-    FROM (
-      SELECT
-        id,
-        monitor_id,
-        checked_at,
-        status,
-        latency_ms,
-        ROW_NUMBER() OVER (
-          PARTITION BY monitor_id
-          ORDER BY checked_at DESC, id DESC
-        ) AS rn
-      FROM check_results
-      WHERE monitor_id IN (${placeholders})
-    )
-    WHERE rn <= ?1
-    ORDER BY monitor_id, checked_at DESC, id DESC
+    FROM check_results
+    WHERE monitor_id = ?1
+    ORDER BY checked_at DESC
+    LIMIT ?2
   `;
 
-  const { results } = await db
-    .prepare(sql)
-    .bind(limitPerMonitor, ...ids)
-    .all<HeartbeatRow>();
-  for (const r of results ?? []) {
-    appendMapValue(byMonitor, r.monitor_id, {
-      checked_at: r.checked_at,
-      status: toCheckStatus(r.status),
-      latency_ms: r.latency_ms,
-    });
+  const batches = await Promise.all(
+    ids.map((id) => db.prepare(sql).bind(id, limitPerMonitor).all<HeartbeatRow>()),
+  );
+  for (const { results } of batches) {
+    for (const r of results ?? []) {
+      appendMapValue(byMonitor, r.monitor_id, {
+        checked_at: r.checked_at,
+        status: toCheckStatus(r.status),
+        latency_ms: r.latency_ms,
+      });
+    }
   }
 
   return byMonitor;

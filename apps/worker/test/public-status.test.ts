@@ -35,7 +35,7 @@ describe('public/status payload regression', () => {
         first: (args) => (args[0] === 'uptime_rating_level' ? { value: '4' } : null),
       },
       {
-        match: 'row_number() over',
+        match: 'order by checked_at desc',
         all: () => [
           { monitor_id: 11, checked_at: now - 60, status: 'up', latency_ms: 80 },
           { monitor_id: 11, checked_at: now - 120, status: 'down', latency_ms: null },
@@ -243,7 +243,7 @@ describe('public/status payload regression', () => {
         first: (args) => (args[0] === 'uptime_rating_level' ? { value: '3' } : null),
       },
       {
-        match: 'row_number() over',
+        match: 'order by checked_at desc',
         all: () => [
           { monitor_id: 11, checked_at: now - 60, status: 'up', latency_ms: 50 },
           { monitor_id: 12, checked_at: now - 120, status: 'up', latency_ms: 70 },
@@ -341,7 +341,7 @@ describe('public/status payload regression', () => {
         first: (args) => (args[0] === 'uptime_rating_level' ? { value: '3' } : null),
       },
       {
-        match: 'row_number() over',
+        match: 'order by checked_at desc',
         all: () => [
           { monitor_id: 11, checked_at: now - 60, status: 'up', latency_ms: 50 },
           { monitor_id: 12, checked_at: roundedPreCreationCheckAt, status: 'up', latency_ms: 70 },
@@ -438,7 +438,7 @@ describe('public/status payload regression', () => {
         first: (args) => (args[0] === 'uptime_rating_level' ? { value: '3' } : null),
       },
       {
-        match: 'row_number() over',
+        match: 'order by checked_at desc',
         all: () => [
           { monitor_id: 11, checked_at: now - 60, status: 'up', latency_ms: 50 },
           { monitor_id: 12, checked_at: newMonitorCreatedAt + 270, status: 'up', latency_ms: 70 },
